@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENO IA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4B00FF;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            background-color: #4B00FF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3600b2;
+        }
+
+        #chat {
+            margin-top: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+        }
+
+        .user {
+            background-color: #d1e7ff;
+            text-align: right;
+        }
+
+        .zeno {
+            background-color: #e0ffe0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ZENO IA</h1>
+        <p>Posez vos questions à Zeno, votre intelligence artificielle personnelle</p>
+    </header>
+    <main>
+        <div>
+            <input type="text" id="question" placeholder="Écrivez votre question ici...">
+            <button onclick="askZeno()">Envoyer</button>
+        </div>
+        <div id="chat"></div>
+    </main>
+
+    <script>
+        function askZeno() {
+            const input = document.getElementById("question");
+            const question = input.value.trim();
+            if(question === "") return;
+
+            // Affiche la question de l'utilisateur
+            const chat = document.getElementById("chat");
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            userMessage.textContent = question;
+            chat.appendChild(userMessage);
+
+            // Simule une réponse de Zeno (à remplacer par un vrai API IA)
+            const zenoMessage = document.createElement("div");
+            zenoMessage.className = "message zeno";
+            zenoMessage.textContent = "Zeno réfléchit...";
+            chat.appendChild(zenoMessage);
+
+            input.value = "";
+            chat.scrollTop = chat.scrollHeight;
+
+            // Exemple de réponse simulée après 1s
+            setTimeout(() => {
+                zenoMessage.textContent = "Zeno: " + generateAnswer(question);
+                chat.scrollTop = chat.scrollHeight;
+            }, 1000);
+        }
+
+        // Fonction simulée pour générer une réponse
+        function generateAnswer(question) {
+            return "Voici une réponse intelligente à votre question : '" + question + "'";
+        }
+    </script>
+</body>
+</html>
