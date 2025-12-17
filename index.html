@@ -3,125 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENO IA</title>
+    <title>ZENO</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+        /* Style général */
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: Arial, sans-serif;
         }
 
-        header {
-            background-color: #4B00FF;
+        h1 {
             color: white;
+            font-size: 80px;
             text-align: center;
-            padding: 2rem;
+            position: relative;
+            z-index: 10;
+            margin-top: 50px;
         }
 
-        header h1 {
-            margin: 0;
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
         }
 
-        main {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 1rem;
-            background-color: white;
+        /* Formulaires */
+        .form-container {
+            position: relative;
+            z-index: 10;
+            width: 300px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(30, 30, 30, 0.8);
             border-radius: 10px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-        }
-
-        input[type="text"] {
-            width: 80%;
-            padding: 0.5rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        button {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            background-color: #4B00FF;
             color: white;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
             border: none;
             border-radius: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: purple;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #3600b2;
+        .form-toggle {
+            text-align: center;
+            margin-top: 10px;
+            cursor: pointer;
+            color: #aaa;
         }
 
-        #chat {
-            margin-top: 2rem;
-            max-height: 400px;
-            overflow-y: auto;
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
         }
 
-        .message {
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 5px;
-        }
-
-        .user {
-            background-color: #d1e7ff;
-            text-align: right;
-        }
-
-        .zeno {
-            background-color: #e0ffe0;
-            text-align: left;
+        .success {
+            color: lightgreen;
+            font-size: 14px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>ZENO IA</h1>
-        <p>Posez vos questions à Zeno, votre intelligence artificielle personnelle</p>
-    </header>
-    <main>
-        <div>
-            <input type="text" id="question" placeholder="Écrivez votre question ici...">
-            <button onclick="askZeno()">Envoyer</button>
-        </div>
-        <div id="chat"></div>
-    </main>
+    <h1>ZENO</h1>
+    <canvas id="stars"></canvas>
+
+    <div class="form-container" id="login-form">
+        <h2>Connexion</h2>
+        <div class="error" id="login-error"></div>
+        <input type="text" id="login-username" placeholder="Nom d'utilisateur" required>
+        <input type="password" id="login-password" placeholder="Mot de passe" required>
+        <button onclick="login()">Se connecter</button>
+        <div class="form-toggle" onclick="toggleForms()">Pas de compte ? S'inscrire</div>
+    </div>
+
+    <div class="form-container" id="register-form" style="display:none;">
+        <h2>Inscription</h2>
+        <div class="error" id="register-error"></div>
+        <div class="success" id="register-success"></div>
+        <input type="text" id="register-username" placeholder="Nom d'utilisateur" required>
+        <input type="password" id="register-password" placeholder="Mot de passe" required>
+        <input type="password" id="register-password2" placeholder="Confirmer le mot de passe" required>
+        <button onclick="register()">S'inscrire</button>
+        <div class="form-toggle" onclick="toggleForms()">Déjà un compte ? Se connecter</div>
+    </div>
 
     <script>
-        function askZeno() {
-            const input = document.getElementById("question");
-            const question = input.value.trim();
-            if(question === "") return;
+        // Animation des étoiles
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
 
-            // Affiche la question de l'utilisateur
-            const chat = document.getElementById("chat");
-            const userMessage = document.createElement("div");
-            userMessage.className = "message user";
-            userMessage.textContent = question;
-            chat.appendChild(userMessage);
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
 
-            // Simule une réponse de Zeno (à remplacer par un vrai API IA)
-            const zenoMessage = document.createElement("div");
-            zenoMessage.className = "message zeno";
-            zenoMessage.textContent = "Zeno réfléchit...";
-            chat.appendChild(zenoMessage);
+        const stars = [];
+        const numStars = 200;
 
-            input.value = "";
-            chat.scrollTop = chat.scrollHeight;
-
-            // Exemple de réponse simulée après 1s
-            setTimeout(() => {
-                zenoMessage.textContent = "Zeno: " + generateAnswer(question);
-                chat.scrollTop = chat.scrollHeight;
-            }, 1000);
+        for(let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 2 + 1,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02 + 0.01
+            });
         }
 
-        // Fonction simulée pour générer une réponse
-        function generateAnswer(question) {
-            return "Voici une réponse intelligente à votre question : '" + question + "'";
+        function drawStars() {
+            ctx.clearRect(0, 0, width, height);
+            for(let star of stars) {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(128, 0, 128, ${star.alpha})`; 
+                ctx.fill();
+                
+                star.alpha += star.speed;
+                if(star.alpha <= 0 || star.alpha >= 1) star.speed = -star.speed;
+            }
+            requestAnimationFrame(drawStars);
+        }
+
+        drawStars();
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Gestion formulaire
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+
+        function toggleForms() {
+            if(loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+
+        // Stockage temporaire des utilisateurs (simulateur)
+        let users = [];
+
+        function register() {
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value;
+            const password2 = document.getElementById('register-password2').value;
+            const errorDiv = document.getElementById('register-error');
+            const successDiv = document.getElementById('register-success');
+
+            errorDiv.textContent = '';
+            successDiv.textContent = '';
+
+            if(!username || !password || !password2) {
+                errorDiv.textContent = "Tous les champs sont requis.";
+                return;
+            }
+
+            if(password !== password2) {
+                errorDiv.textContent = "Les mots de passe ne correspondent pas.";
+                return;
+            }
+
+            if(users.some(u => u.username === username)) {
+                errorDiv.textContent = "Nom d'utilisateur déjà utilisé.";
+                return;
+            }
+
+            users.push({ username, password });
+            successDiv.textContent = "Inscription réussie ! Vous pouvez maintenant vous connecter.";
+            document.getElementById('register-username').value = '';
+            document.getElementById('register-password').value = '';
+            document.getElementById('register-password2').value = '';
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            errorDiv.textContent = '';
+
+            const user = users.find(u => u.username === username && u.password === password);
+            if(user) {
+                alert("Connexion réussie ! Bienvenue " + username + " !");
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+            } else {
+                errorDiv.textContent = "Nom d'utilisateur ou mot de passe incorrect.";
+            }
         }
     </script>
 </body>
